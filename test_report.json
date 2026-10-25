@@ -1,0 +1,12 @@
+{
+  "sample_ft": 967.8196508992977,
+  "sample_error_pct": 1.8757527262418527,
+  "samples": 384,
+  "ok": 309,
+  "blocked": 75,
+  "monotonic_comparisons": 910,
+  "monotonic_fails": 0,
+  "tailwind_blocked": true,
+  "scope": "research only; headwind; flap 25",
+  "status": "NON VALIDATO PER USO OPERATIVO"
+}

@@ -1,13 +1,13 @@
-# PA-28-181 Ground Roll Lab — v0.6
+# PA-28-181 Figure 5-13 · prototipo v0.9
 
-**NON VALIDATE PER USO OPERATIVO — NON USARE PER PIANIFICARE DECOLLI.**
+**NON VALIDATO PER USO OPERATIVO.**
 
-La v0.6 aggiunge importazione di backup JSON (`pa28-unverified-point-readings-v1`), esportazione CSV per revisione manuale e controllo di coerenza dei punti (range, duplicati e posizione sulla scansione). Tutte le letture rimangono **NON verificate** e **NON entrano nei calcoli**. Non è ancora una digitalizzazione matematica delle curve del POH: il motore mantiene solo gli esempi POH documentati e una modalità sperimentale esplicitamente opzionale.
+Questa cartella è direttamente pubblicabile su GitHub Pages: caricare **tutti i file** nella radice del repository e attivare Settings → Pages → Deploy from a branch. Non è un aggiornamento automatico del sito dell’utente.
 
-I dati locali sono conservati sotto la chiave `pa28-manual-readings-v04`. Importare e salvare un file JSON non certifica un punto: il controllo rileva errori strutturali, non verifica il dato rispetto al grafico. Prima di aggiornare o cancellare i dati, effettuare un export JSON.
+Funziona su HTTPS (PWA offline dopo il primo caricamento). La pagina è utilizzabile su iPhone/Android. Tutti i risultati derivano da geometrie preliminari delle linee tracciate manualmente, non da dati approvati per l'uso aeronautico.
 
-## Installazione GitHub Pages
+**Campo:** solo Figure 5-13 ground roll flap 25°, vento frontale da 0 a 15 kt. Vento in coda, flap 0° e ostacolo 50 ft non sono calcolati. Interpolazione di quota fra curve adiacenti solo quando entrambi i tratti sono disponibili. Scala °C e massa lb in coordinate ancora approssimate.
 
-Estrarre lo ZIP e caricare **tutti** i file nella root del repository (inclusi i due PNG). Pubblicare da branch `main`, root. Con una connessione disponibile la PWA usa rete prima della cache; in assenza di rete può usare i file precedentemente memorizzati.
+Punto POH noto 2.000 ft, 21 °C, 2.400 lb, 10 kt frontali, 950 ft. Tolleranza ±2% riferita soltanto alla digitalizzazione di quell'esempio. La prova singola **non valida** la superficie generale del nomogramma né le prestazioni reali.
 
-Fonte: POH Piper PA-28-181 Archer II, Report VB-1120, figure 5-11 e 5-13. Verificare sempre l'applicabilità del POH all'aeromobile specifico.
+Per collaudare, usare `python -m http.server 8000` dalla cartella e aprire `http://localhost:8000`. Il calcolo con massa è in kg (2.400 lb = circa 1088,622 kg).

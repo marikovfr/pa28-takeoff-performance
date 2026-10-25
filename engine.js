@@ -1,45 +1,29 @@
-/* PA-28-181 ground-roll experimental engine, v0.5.
- * NOT VALIDATED FOR OPERATIONAL USE.
- * Manufacturer examples are exact documented anchor points ONLY.
- * All other distances are provisional surrogate estimates, NOT POH interpolation.
- */
-(function(root, factory) {
-  const engine = factory();
-  if (typeof module === 'object' && module.exports) module.exports = engine;
-  else root.PA28Engine = engine;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function() {
-  'use strict';
-  const FT_TO_M = 0.3048;
-  const LB_TO_KG = 0.45359237;
-  const REFERENCE_KG = 2400 * LB_TO_KG;
-  const ANCHORS = Object.freeze({
-    '0': Object.freeze({altFt:2000, oatC:21, weightKg:REFERENCE_KG, windKt:8, rollFt:1100, fig:'5-11'}),
-    '25': Object.freeze({altFt:2000, oatC:21, weightKg:REFERENCE_KG, windKt:10, rollFt:950, fig:'5-13'})
-  });
-  const RANGE = Object.freeze({altFt:[0,7000], oatC:[-40,40], weightKg:[900,1157], windKt:[-10,15]});
-  function compute(data, options = {}) {
-    const {altFt,oatC,weightKg,windKt,flaps} = data;
-    const items = {altFt,oatC,weightKg,windKt};
-    const errors = [];
-    if (!Object.hasOwn(ANCHORS,flaps)) errors.push('Configurazione flap non supportata.');
-    for(const [key,value] of Object.entries(items)) {
-      const [min,max] = RANGE[key];
-      if (typeof value !== 'number' || !Number.isFinite(value)) errors.push(`${key}: valore numerico mancante.`);
-      else if(value < min || value > max) errors.push(`${key}: fuori dall’intervallo del prototipo (${min}–${max}).`);
-    }
-    if(errors.length) return {kind:'invalid', meters:null, errors};
-    const ref=ANCHORS[flaps];
-    const matches=altFt===ref.altFt && oatC===ref.oatC && Math.abs(weightKg-ref.weightKg)<0.6 && windKt===ref.windKt;
-    if(matches) return {kind:'poh-example', meters:ref.rollFt*FT_TO_M, errors:[], reference:ref.fig};
-    if (options.allowExperimental !== true) return {kind:'unavailable',meters:null,errors:[],reference:ref.fig};
-    // EXPERIMENTAL ONLY: retained to compare future digitized data; never a POH interpolation.
-    // v0.1 provisional approximation retained visibly as a NON-POH estimate.
-    // No validation can be inferred from agreement at manufacturer anchor points.
-    const densityChange=(altFt-ref.altFt)+120*(oatC-ref.oatC);
-    const atmospheric=Math.exp(0.000092*densityChange);
-    const mass=Math.pow(weightKg/ref.weightKg,2);
-    const windFactor=Math.max(0.4,1-0.034*(windKt-ref.windKt));
-    return {kind:'provisional',meters:ref.rollFt*FT_TO_M*atmospheric*mass*windFactor,errors:[],reference:ref.fig};
-  }
-  return Object.freeze({compute, ANCHORS, RANGE, FT_TO_M, LB_TO_KG, version:"0.5"});
-});
+"use strict";
+// Geometry from user-traced original Piper figure 5-13. RESEARCH ONLY.
+const APP_VERSION='0.9', ALT={7000:['A1','A5'],6000:['A2','A7'],5000:['A3','A9'],4000:['A4','A11'],3000:['A6','A12'],2000:['A8','A14'],1000:['A10','A15'],0:['A13','A16']};
+const P=['P1','P2','P3','P4','P5','P6','P7','P8'];
+const H=[['H3','H4','H7'],['H5','H6','H9'],['H8','H10','H12'],['H11','H13'],['H14','H15'],['H16','H17'],['H18','H19'],['H20']];
+const X={weightEntry:1021,windEntry:1482,wind10:1598.3333333};
+const Y={ft400:1088,ft600:1023};
+let tracks=null;
+class MissingGeometry extends Error{}
+function lineY(id,x){const r=tracks[id];if(!r)throw new MissingGeometry('Traccia assente: '+id);const [a,b,c,d]=[r.x1_px,r.y1_px,r.x2_px,r.y2_px];if(a===c)throw new MissingGeometry('Traccia verticale');return b+(x-a)*(d-b)/(c-a)}
+function bounds(id,x,tolerance=0){const r=tracks[id];return x>=Math.min(r.x1_px,r.x2_px)-tolerance&&x<=Math.max(r.x1_px,r.x2_px)+tolerance}
+function chainY(ids,x){const parts=ids.map(id=>{let r=tracks[id];return {id,lo:Math.min(r.x1_px,r.x2_px),hi:Math.max(r.x1_px,r.x2_px)}}).sort((a,b)=>a.lo-b.lo);
+ for(let p of parts)if(x>=p.lo&&x<=p.hi)return lineY(p.id,x);
+ for(let i=0;i<parts.length-1;i++){const a=parts[i],b=parts[i+1];if(a.hi<=x&&x<=b.lo&&b.lo-a.hi<=8){const ya=lineY(a.id,a.hi),yb=lineY(b.id,b.lo);if(Math.hypot(b.lo-a.hi,yb-ya)<=8)return ya+(x-a.hi)*(yb-ya)/(b.lo-a.hi)}}
+ throw new MissingGeometry('Segmento del vento non disponibile a x='+x.toFixed(1)+' per '+ids.join('+'))}
+function altitudeAt(q,t){if(!(q>=0&&q<=7000&&t>=-40&&t<=35))throw new MissingGeometry('Quota/temperatura fuori dal campo previsto');
+ const x=806+(t-21)*6;let data=[];for(const [alt,ids] of Object.entries(ALT)){const located=ids.filter(id=>bounds(id,x,0));if(located.length===1)data.push({alt:+alt,y:lineY(located[0],x),track:located[0]}); else if(located.length>1){const ys=located.map(id=>lineY(id,x));if(Math.max(...ys)-Math.min(...ys)>3)throw new MissingGeometry('Segmenti quota incoerenti');data.push({alt:+alt,y:ys.reduce((a,b)=>a+b)/ys.length,track:located.join('+')})}}
+ data.sort((a,b)=>a.alt-b.alt);const exact=data.find(v=>v.alt===q);if(exact)return {...exact,x};
+ // Must bracket by *consecutive true 1000-ft contours*, no jumping missing contours.
+ for(let i=0;i<data.length-1;i++){const a=data[i],b=data[i+1];if(b.alt-a.alt===1000&&a.alt<q&&q<b.alt){const t=(q-a.alt)/1000;return {alt:q,y:a.y+(b.y-a.y)*t,track:a.track+'/'+b.track,x}}}
+ throw new MissingGeometry('Curve della quota insufficienti per interpolare questa combinazione')}
+function pair(y,ids,xin,xout,fn,label){const vals=ids.map((id,i)=>({id:String(i+1),track:id,y:fn(id,xin),i})).sort((a,b)=>a.y-b.y);let matches=[];for(let i=0;i<vals.length-1;i++){let a=vals[i],b=vals[i+1];if(a.y<=y&&y<=b.y)matches.push([a,b])}if(matches.length!==1)throw new MissingGeometry(label+': ingresso fuori dalla famiglia di curve');const [a,b]=matches[0];if(Math.abs(a.i-b.i)!==1)throw new MissingGeometry(label+': curve non adiacenti');const t=(y-a.y)/(b.y-a.y);return {tracks:[a.track,b.track],fraction:t,y:(1-t)*fn(a.track,xout)+t*fn(b.track,xout)}}
+function weightAt(y,lb){if(lb<1980||lb>2550)throw new MissingGeometry('Peso fuori dalla scala rappresentata');let x=1112.1818181818182+(2400-lb)*.565;
+ const read=(id,z)=>lineY(id,z);const w=pair(y,P,X.weightEntry,x,read,'Peso');for(const id of w.tracks)if(!bounds(id,X.weightEntry,2)||!bounds(id,x,2))throw new MissingGeometry('Peso: tratto mancante '+id);return {...w,x}}
+function headwindAt(y,wind){if(wind<0||wind>15)throw new MissingGeometry('Vento in coda non ancora calibrato: calcolo bloccato');const x=X.windEntry+(wind/10)*(X.wind10-X.windEntry);return {...pair(y,H,X.windEntry,x,chainY,'Vento frontale'),x}}
+function compute({alt,temp,mass,wind}){for(let v of [alt,temp,mass,wind])if(!Number.isFinite(v))throw new MissingGeometry('Dati numerici mancanti');if(mass<900||mass>1157)throw new MissingGeometry('Massa fuori dal campo previsto');const lb=mass*2.20462262185;const a=altitudeAt(alt,temp),w=weightAt(a.y,lb),h=headwindAt(w.y,wind);const ft=400+200*(Y.ft400-h.y)/(Y.ft400-Y.ft600);if(!Number.isFinite(ft)||ft<=0||ft>3500)throw new MissingGeometry('Intersezione distanza fuori dalla scala plausibile');return {ft,m:ft*.3048,altitude:a,weight:w,wind:h,weightLb:lb,labels:'NON VALIDATO PER USO OPERATIVO',anchorSource:'calibrazioni sperimentali'};}
+async function main(){const out=document.getElementById('status');try{tracks=await (await fetch('tracks.json')).json();out.textContent='Motore geometrico caricato'}catch(e){out.textContent='Impossibile caricare le curve: serve un server HTTP/HTTPS';out.className='status fail';return}
+ document.getElementById('calc').addEventListener('submit',ev=>{ev.preventDefault();const params={alt:+document.getElementById('alt').value,temp:+document.getElementById('temp').value,mass:+document.getElementById('mass').value,wind:+document.getElementById('wind').value};try{const r=compute(params);document.getElementById('status').textContent='STIMA SPERIMENTALE — NON OPERATIVA';document.getElementById('status').className='status ok';document.getElementById('meters').textContent=r.m.toFixed(1)+' m';document.getElementById('feet').textContent=r.ft.toFixed(1)+' ft';document.getElementById('reason').textContent='Risultato geometrico preliminare. Non impiegare per decisioni di decollo.';document.getElementById('trace').innerHTML='<table>'+[['Quota',r.altitude.track],['Peso',r.weight.tracks.join(', ')],['Vento',r.wind.tracks.map(s=>s.join('+')).join(' / ')],['Peso lb',r.weightLb.toFixed(1)]].map(([k,v])=>'<tr><th>'+k+'</th><td>'+v+'</td></tr>').join('')+'</table>'}catch(e){document.getElementById('status').textContent='CALCOLO BLOCCATO — DATI INSUFFICIENTI';document.getElementById('status').className='status fail';document.getElementById('meters').textContent='—';document.getElementById('feet').textContent='';document.getElementById('trace').textContent='';document.getElementById('reason').textContent=e.message}});document.getElementById('calc').requestSubmit();}
+if(typeof document!=='undefined'){main();if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.register('service-worker.js').catch(()=>{});}if(typeof module!=='undefined')module.exports={compute,setTracks:t=>tracks=t,MissingGeometry};
