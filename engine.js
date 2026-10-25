@@ -1,4 +1,4 @@
-/* PA-28-181 ground-roll experimental engine, v0.3.
+/* PA-28-181 ground-roll experimental engine, v0.4.
  * NOT VALIDATED FOR OPERATIONAL USE.
  * Manufacturer examples are exact documented anchor points ONLY.
  * All other distances are provisional surrogate estimates, NOT POH interpolation.
@@ -41,5 +41,5 @@
     const windFactor=Math.max(0.4,1-0.034*(windKt-ref.windKt));
     return {kind:'provisional',meters:ref.rollFt*FT_TO_M*atmospheric*mass*windFactor,errors:[],reference:ref.fig};
   }
-  return Object.freeze({compute, ANCHORS, RANGE, FT_TO_M, LB_TO_KG, version:"0.3"});
+  return Object.freeze({compute, ANCHORS, RANGE, FT_TO_M, LB_TO_KG, version:"0.4"});
 });
