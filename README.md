@@ -1,38 +1,19 @@
-# PA-28-181 Ground Roll Lab — v0.2
+# PA-28-181 Ground Roll Lab — v0.3
 
-**NON VALIDATE PER USO OPERATIVO — NON UTILIZZARE PER LA PIANIFICAZIONE O DECISIONE DI DECOLLO.**
+**NON VALIDATE PER USO OPERATIVO.** Vietato usarla per decisioni di decollo.
 
-PWA mobile-first, senza dipendenze. Quote pressione in ft, OAT in °C, massa in kg, vento lungo pista in kt, risultato in m. Flap 0° / 25°.
+## Cosa cambia
+- **Modalità prudente predefinita:** fuori dai due esempi documentati, il calcolatore NON mostra distanze arbitrarie.
+- **Modalità sperimentale opt-in:** le vecchie stime proxy v0.1/v0.2 possono essere abilitate soltanto per test software; non sono basate sulle curve.
+- Aggiunto `data-poh.json` con provenienza, due esempi documentati e contenitore vuoto per futura digitalizzazione verificabile.
+- 8 controlli software, con `node tests.js`. Non sono prove di accuratezza di volo.
+- Layout mobile, aggiornamento automatico e offline PWA conservati.
 
-## Avvio
+## Perché non abbiamo chiamato questa release “interpolazione POH”
+I due esempi disponibili non consentono di ricostruire un modello in 4 variabili. Occorre estrarre più punti da entrambe le figure 5-11 e 5-13 e verificare su punti non utilizzati in calibrazione. I numeri mostrati in modalità sperimentale sono gli stessi coefficienti euristici precedenti, mai garantiti conservativi.
 
-Aprire `index.html` localmente per provarne l'interfaccia. Per installazione offline tramite Service Worker ospitare **l'intera cartella** su HTTPS (ad esempio GitHub Pages o un server web HTTPS), aprire la pagina dallo smartphone, quindi usare «Aggiungi a schermata Home» (Safari iOS) o «Installa app» (Chrome Android). Il collegamento al POH richiede rete; il calcolo sperimentale no.
+## Istruzioni di caricamento GitHub
+Caricare tutti i file contenuti in questa cartella direttamente alla radice del repository GitHub Pages, sovrascrivendo gli omonimi. La cache usa `pa28-groundroll-v03` per forzare l'aggiornamento. Accertarsi che `index.html` sia nella root e che compaia `v0.3` in pagina.
 
-## Fondamento e limiti del motore
-
-POH Piper Archer II report VB-1120, figura 5-11: 2000 ft / 21 °C / 2400 lb / 8 kt frontali / 1100 ft rullata (335,28 m). Figura 5-13: medesime condizioni, flap 25° e vento 10 kt / 950 ft rullata (289,56 m).
-
-**Il motore non è una digitalizzazione della nomografia.** Al variare dei parametri utilizza formule proxy sperimentali in `app.js` (densità, peso, vento), non validate e non garantite conservative. L'app riproduce solo i due esempi citati alle rispettive condizioni. Tutti gli altri risultati sono stime fittizie a scopo di prototipazione dell'interfaccia.
-
-Non interpreta ostacoli, erba, slope, contaminazione, technique, condizioni motore. Non approvato da Piper/FAA/EASA.
-
-## Passi successivi
-
-1. Digitizzare diversi punti sull'intera nomografia dal POH applicabile alla cellula.
-2. Sostituire `provisionalEstimate` con lookup/interpolazione e test automatici su punti POH indipendenti.
-3. Gestire condizioni fuori campo senza estrapolare.
-4. Aggiungere takeoff over 50 ft solo dopo validazione del modello ground roll.
-
-Fonte: https://www.andrews.edu/cp/aviation/resources/archerii-poh.pdf
-
-## Novità v0.2
-
-- Motore separato (`engine.js`) e test automatici (`tests.js`), eseguibili con `node tests.js`.
-- Distingue conversione di un **esempio POH noto** (`ESEMPIO POH`) da una stima approssimata (`STIMA SPERIMENTALE`).
-- Aggiornamento istantaneo su input, avvisi fuori campo e cache PWA aggiornata.
-- Importante: la formula fuori dai punti POH è **ancora quella provvisoria v0.1**, non un'interpolazione digitalizzata, quindi la precisione NON è migliorata.
-- L'adeguamento numerico alle curve originali richiede ulteriori misurazioni e verifica indipendente.
-
-## Aggiornamento GitHub Pages
-
-Sostituire i file esistenti con tutti i file della cartella `pa28-pwa` (incluso `engine.js`) alla radice del repository. Attendere il completamento della pubblicazione e ricaricare la pagina; il service worker usa una nuova chiave di cache `pa28-groundroll-v02`.
+## Condizioni di riferimento
+POH Piper Archer II Report VB-1120: figure 5-11 (flap 0°, 2.000 ft, 21 °C, 2.400 lb, 8 kt headwind, 1.100 ft ground roll) e 5-13 (flap 25°, 2.000 ft, 21 °C, 2.400 lb, 10 kt headwind, 950 ft ground roll). Usare solo il POH approvato specifico per la cellula.

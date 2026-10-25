@@ -4,6 +4,7 @@ const distance = document.getElementById('distance');
 const explain = document.getElementById('explain');
 const issues = document.getElementById('issues');
 const status = document.getElementById('status');
+const experimental = document.getElementById('experimental');
 const formatter = new Intl.NumberFormat('it-IT', {maximumFractionDigits:0});
 const labels = {altFt:'Quota pressione',oatC:'Temperatura',weightKg:'Peso',windKt:'Vento'};
 function calculate(event) {
@@ -20,7 +21,7 @@ function calculate(event) {
     distance.textContent='—';status.textContent='INPUT INCOMPLETI';
     explain.textContent='Compila i campi mancanti: '+missing.join(', ')+'.';issues.hidden=true;return;
   }
-  const result=PA28Engine.compute(values);
+  const result=PA28Engine.compute(values,{allowExperimental:experimental.checked});
   if(result.kind==='invalid'){
     distance.textContent='—';status.textContent='FUORI INTERVALLO';
     explain.textContent='Il prototipo non calcola valori fuori dagli intervalli indicati.';
@@ -28,6 +29,10 @@ function calculate(event) {
     issues.hidden=false;return;
   }
   issues.hidden=true;
+  if(result.kind==='unavailable'){
+    distance.textContent='—';status.textContent='NESSUN DATO POH';
+    explain.textContent='Nessun punto POH verificato coincide con questi input. Non è corretto calcolare un valore come se provenisse dalle curve originali. Attiva la modalità sperimentale solo per test di interfaccia.';return;
+  }
   distance.textContent=formatter.format(result.meters);
   if(result.kind==='poh-example'){
     status.textContent='ESEMPIO POH';
@@ -38,6 +43,7 @@ function calculate(event) {
   }
 }
 form.addEventListener('submit',calculate);
+experimental.addEventListener('change',calculate);
 form.querySelectorAll('input').forEach(input=>{
   input.addEventListener('input',calculate);
   input.addEventListener('change',calculate);

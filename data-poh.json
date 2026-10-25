@@ -1,0 +1,12 @@
+{
+  "aircraft":"PA-28-181 Archer II",
+  "manual":"POH Report VB-1120; verify applicability to aircraft serial number and revisions",
+  "status":"ONLY TWO MANUFACTURER EXAMPLES VERIFIED; NOT A DIGITIZED PERFORMANCE SURFACE",
+  "source":"https://www.mfu-pilotenclub.at/wp-content/uploads/2023/04/kbs-poh.pdf",
+  "verifiedExamples":[
+    {"figure":"5-11","flapsDeg":0,"pressureAltitudeFt":2000,"temperatureC":21,"weightLb":2400,"headwindKt":8,"groundRollFt":1100,"groundRollM":335.28},
+    {"figure":"5-13","flapsDeg":25,"pressureAltitudeFt":2000,"temperatureC":21,"weightLb":2400,"headwindKt":10,"groundRollFt":950,"groundRollM":289.56}
+  ],
+  "digitizedCurves":[],
+  "note":"No additional graph points fabricated; append curve points only after verifiable manual extraction and independent review."
+}
