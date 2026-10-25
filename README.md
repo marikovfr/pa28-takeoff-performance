@@ -1,4 +1,4 @@
-# PA-28-181 Ground Roll Lab — v0.1
+# PA-28-181 Ground Roll Lab — v0.2
 
 **NON VALIDATE PER USO OPERATIVO — NON UTILIZZARE PER LA PIANIFICAZIONE O DECISIONE DI DECOLLO.**
 
@@ -24,3 +24,15 @@ Non interpreta ostacoli, erba, slope, contaminazione, technique, condizioni moto
 4. Aggiungere takeoff over 50 ft solo dopo validazione del modello ground roll.
 
 Fonte: https://www.andrews.edu/cp/aviation/resources/archerii-poh.pdf
+
+## Novità v0.2
+
+- Motore separato (`engine.js`) e test automatici (`tests.js`), eseguibili con `node tests.js`.
+- Distingue conversione di un **esempio POH noto** (`ESEMPIO POH`) da una stima approssimata (`STIMA SPERIMENTALE`).
+- Aggiornamento istantaneo su input, avvisi fuori campo e cache PWA aggiornata.
+- Importante: la formula fuori dai punti POH è **ancora quella provvisoria v0.1**, non un'interpolazione digitalizzata, quindi la precisione NON è migliorata.
+- L'adeguamento numerico alle curve originali richiede ulteriori misurazioni e verifica indipendente.
+
+## Aggiornamento GitHub Pages
+
+Sostituire i file esistenti con tutti i file della cartella `pa28-pwa` (incluso `engine.js`) alla radice del repository. Attendere il completamento della pubblicazione e ricaricare la pagina; il service worker usa una nuova chiave di cache `pa28-groundroll-v02`.

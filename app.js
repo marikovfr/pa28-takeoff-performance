@@ -1,60 +1,48 @@
 'use strict';
-// v0.1: Provisional engineering surrogate, NOT a certified POH lookup.
-// One manufacturer example is reproduced for each flap setting.
-const FT_TO_M = 0.3048;
-const LBS_TO_KG = 0.45359237;
-const REFERENCE_KG = 2400 * LBS_TO_KG;
-const examples = {
-  '0':  {distanceFeet: 1100, wind: 8, source: 'POH VB-1120 figura 5-11'},
-  '25': {distanceFeet: 950,  wind: 10, source: 'POH VB-1120 figura 5-13'}
-};
 const form = document.getElementById('calc');
 const distance = document.getElementById('distance');
 const explain = document.getElementById('explain');
 const issues = document.getElementById('issues');
+const status = document.getElementById('status');
 const formatter = new Intl.NumberFormat('it-IT', {maximumFractionDigits:0});
-function provisionalEstimate(alt, temp, weight, wind, flaps) {
-  const ref = examples[flaps];
-  // Hypothetical scaling: altitude, temperature, mass, wind correction.
-  // All coefficients below are experimental and MUST be replaced with
-  // digitized, validated performance curves before operational use.
-  const densityAltitudeChange = (alt - 2000) + 120 * (temp - 21);
-  const atmospheric = Math.exp(0.000092 * densityAltitudeChange);
-  const mass = Math.pow(weight / REFERENCE_KG, 2.0);
-  const windFactor = Math.max(0.4, 1 - 0.034 * (wind - ref.wind));
-  return ref.distanceFeet * FT_TO_M * atmospheric * mass * windFactor;
-}
+const labels = {altFt:'Quota pressione',oatC:'Temperatura',weightKg:'Peso',windKt:'Vento'};
 function calculate(event) {
   event?.preventDefault();
-  const flaps = form.elements.flaps.value;
-  const alt = Number(document.getElementById('alt').value);
-  const temp = Number(document.getElementById('temp').value);
-  const weight = Number(document.getElementById('weight').value);
-  const wind = Number(document.getElementById('wind').value);
-  const fields = [alt,temp,weight,wind];
-  if (fields.some(n => !Number.isFinite(n)) || ["alt","temp","weight","wind"].some(id => document.getElementById(id).value.trim()==='')) {
-    distance.textContent='—'; explain.textContent='Completa tutti i campi con valori numerici.'; issues.hidden=true; return;
+  const ids={altFt:'alt',oatC:'temp',weightKg:'weight',windKt:'wind'};
+  const values={flaps:form.elements.flaps.value};
+  const missing=[];
+  for(const [key,id] of Object.entries(ids)){
+    const raw=document.getElementById(id).value.trim();
+    if(raw==='') missing.push(labels[key]);
+    values[key]=raw===''?NaN:Number(raw);
   }
-  const problems=[];
-  if(alt<0 || alt>7000) problems.push('Quota pressione fuori dall’intervallo sperimentale (0–7000 ft).');
-  if(temp < -40 || temp > 40) problems.push('Temperatura fuori dall’intervallo sperimentale (−40 / +40 °C).');
-  if(weight < 900 || weight > 1157) problems.push('Massa fuori dall’intervallo sperimentale (900–1157 kg).');
-  if(wind < -10 || wind > 15) problems.push('Vento fuori dall’intervallo sperimentale (−10 / +15 kt).');
-  if(problems.length) {
-    distance.textContent='—'; explain.textContent='Calcolo bloccato: modifica gli input fuori intervallo.';
-    issues.innerHTML=problems.map(p=>'<p>'+p+'</p>').join(''); issues.hidden=false; return;
+  if(missing.length){
+    distance.textContent='—';status.textContent='INPUT INCOMPLETI';
+    explain.textContent='Compila i campi mancanti: '+missing.join(', ')+'.';issues.hidden=true;return;
+  }
+  const result=PA28Engine.compute(values);
+  if(result.kind==='invalid'){
+    distance.textContent='—';status.textContent='FUORI INTERVALLO';
+    explain.textContent='Il prototipo non calcola valori fuori dagli intervalli indicati.';
+    issues.replaceChildren(...result.errors.map(err=>{const p=document.createElement('p');p.textContent=err;return p;}));
+    issues.hidden=false;return;
   }
   issues.hidden=true;
-  const meters = provisionalEstimate(alt,temp,weight,wind,flaps);
-  distance.textContent=formatter.format(meters);
-  const isReference = alt===2000 && temp===21 && Math.abs(weight-REFERENCE_KG)<0.6 && wind===examples[flaps].wind;
-  explain.textContent = isReference
-   ? 'Condizioni coincidenti (entro arrotondamento del peso) con un esempio del POH. Risultato convertito in metri; NON VALIDATO come app.'
-   : 'STIMA DA MODELLO PROVVISORIO: coefficienti non verificati contro tutte le curve del POH. NON UTILIZZARE PER OPERAZIONI DI VOLO.';
+  distance.textContent=formatter.format(result.meters);
+  if(result.kind==='poh-example'){
+    status.textContent='ESEMPIO POH';
+    explain.textContent=`Conversione diretta dell’esempio nel POH (fig. ${result.reference}); input arrotondato in kg. L’APP NON È VALIDATA PER USO OPERATIVO.`;
+  } else {
+    status.textContent='STIMA SPERIMENTALE';
+    explain.textContent='STIMA NON TRATTA DAL GRAFICO POH. Formula provvisoria non verificata: NON UTILIZZARE PER OPERAZIONI DI VOLO.';
+  }
 }
-form.addEventListener('submit', calculate);
-form.querySelectorAll('input').forEach(el=>el.addEventListener('change', calculate));
+form.addEventListener('submit',calculate);
+form.querySelectorAll('input').forEach(input=>{
+  input.addEventListener('input',calculate);
+  input.addEventListener('change',calculate);
+});
 calculate();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
