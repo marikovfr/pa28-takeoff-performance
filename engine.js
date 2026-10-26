@@ -1,5 +1,5 @@
 "use strict";
-const APP_VERSION='0.10';
+const APP_VERSION='0.11';
 const ALT={7000:['A1','A5'],6000:['A2','A7'],5000:['A3','A9'],4000:['A4','A11'],3000:['A6','A12'],2000:['A8','A14'],1000:['A10','A15'],0:['A13','A16']};
 const P=['P1','P2','P3','P4','P5','P6','P7','P8'];
 const H=[['H3','H4','H7'],['H5','H6','H9'],['H8','H10','H12'],['H11','H13'],['H14','H15'],['H16','H17'],['H18','H19'],['H20']];
@@ -34,7 +34,7 @@ function fillTraceTable(r){return '<table>' + [
  ['Risultato',r.ft.toFixed(1)+' ft · '+r.m.toFixed(1)+' m']
 ].map(([k,v])=>'<tr><th>'+k+'</th><td>'+v+'</td></tr>').join('') + '</table>'}
 function trackToCanvas(pt,img){const sx=img.clientWidth/TRACK_SPACE.w, sy=img.clientHeight/TRACK_SPACE.h;return {x:pt.x*sx,y:pt.y*sy}}
-function drawResultOverlay(r){const img=document.getElementById('graphImage');const canvas=document.getElementById('overlay');if(!img.complete||!img.clientWidth)return;canvas.width=img.clientWidth;canvas.height=img.clientHeight;canvas.style.width=img.clientWidth+'px';canvas.style.height=img.clientHeight+'px';const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);const pts=r.trace.points;const Pts={};for(const [k,v] of Object.entries(pts))Pts[k]=trackToCanvas(v,img);
+function drawResultOverlay(r){const img=document.getElementById('graphImage');const canvas=document.getElementById('overlay');if(!img.complete||!img.naturalWidth||!img.clientWidth)return;canvas.width=img.clientWidth;canvas.height=img.clientHeight;canvas.style.width=img.clientWidth+'px';canvas.style.height=img.clientHeight+'px';canvas.style.zIndex='2';const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);const pts=r.trace.points;const Pts={};for(const [k,v] of Object.entries(pts))Pts[k]=trackToCanvas(v,img);
  ctx.lineCap='round';ctx.lineJoin='round';
  function drawSeg(p1,p2,color,dashed=false){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=4; if(dashed)ctx.setLineDash([8,8]); ctx.beginPath();ctx.moveTo(Pts[p1].x,Pts[p1].y);ctx.lineTo(Pts[p2].x,Pts[p2].y);ctx.stroke();ctx.restore();}
  drawSeg('A','B','#1976d2'); drawSeg('B','C','#1976d2',true); drawSeg('C','D','#d32f2f'); drawSeg('D','E','#d32f2f',true); drawSeg('E','F','#7b1fa2'); drawSeg('F','G','#2e7d32',true);

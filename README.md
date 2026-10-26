@@ -1,20 +1,7 @@
-# PA-28-181 Figure 5-13 Lab v0.10
+# PA-28-181 Figure 5-13 v0.11
 
-PWA sperimentale per lo studio della figura 5-13 (25° flap takeoff ground roll).
+**Correzione v0.11:** immagine colorata originale dell’utente 2048×1326, con le curve blu, rosse, viola, verdi e arancione. Non viene più usato il grafico in bianco e nero.
 
-Novità della v0.10:
-- visualizzazione della spezzata direttamente sul grafico originale;
-- punti A→G per seguire il percorso del calcolo;
-- aggiornamento automatico del grafico al variare degli input;
-- stessi blocchi di sicurezza della v0.9.
+La spezzata A-G è sovrapposta alla stessa immagine 2048×1326 usata dal motore numerico. Zoom responsive su mobile. Calcolo sperimentale flap 25°, vento frontale soltanto. Vento in coda bloccato.
 
-Copertura attuale:
-- flap 25°;
-- quota pressione 0–7000 ft (solo dove la geometria è disponibile);
-- temperatura -40/+35 °C;
-- massa 900–1157 kg;
-- vento frontale 0–15 kt.
-
-Limitazioni:
-- vento in coda bloccato;
-- NON VALIDATO PER USO OPERATIVO.
+**NON VALIDATO PER USO OPERATIVO.**
