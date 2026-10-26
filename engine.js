@@ -1,5 +1,5 @@
 "use strict";
-const APP_VERSION='0.11';
+const APP_VERSION='0.12';
 const ALT={7000:['A1','A5'],6000:['A2','A7'],5000:['A3','A9'],4000:['A4','A11'],3000:['A6','A12'],2000:['A8','A14'],1000:['A10','A15'],0:['A13','A16']};
 const P=['P1','P2','P3','P4','P5','P6','P7','P8'];
 const H=[['H3','H4','H7'],['H5','H6','H9'],['H8','H10','H12'],['H11','H13'],['H14','H15'],['H16','H17'],['H18','H19'],['H20']];
@@ -34,20 +34,26 @@ function fillTraceTable(r){return '<table>' + [
  ['Risultato',r.ft.toFixed(1)+' ft · '+r.m.toFixed(1)+' m']
 ].map(([k,v])=>'<tr><th>'+k+'</th><td>'+v+'</td></tr>').join('') + '</table>'}
 function trackToCanvas(pt,img){const sx=img.clientWidth/TRACK_SPACE.w, sy=img.clientHeight/TRACK_SPACE.h;return {x:pt.x*sx,y:pt.y*sy}}
-function drawResultOverlay(r){const img=document.getElementById('graphImage');const canvas=document.getElementById('overlay');if(!img.complete||!img.naturalWidth||!img.clientWidth)return;canvas.width=img.clientWidth;canvas.height=img.clientHeight;canvas.style.width=img.clientWidth+'px';canvas.style.height=img.clientHeight+'px';canvas.style.zIndex='2';const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);const pts=r.trace.points;const Pts={};for(const [k,v] of Object.entries(pts))Pts[k]=trackToCanvas(v,img);
- ctx.lineCap='round';ctx.lineJoin='round';
- function drawSeg(p1,p2,color,dashed=false){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=4; if(dashed)ctx.setLineDash([8,8]); ctx.beginPath();ctx.moveTo(Pts[p1].x,Pts[p1].y);ctx.lineTo(Pts[p2].x,Pts[p2].y);ctx.stroke();ctx.restore();}
- drawSeg('A','B','#1976d2'); drawSeg('B','C','#1976d2',true); drawSeg('C','D','#d32f2f'); drawSeg('D','E','#d32f2f',true); drawSeg('E','F','#7b1fa2'); drawSeg('F','G','#2e7d32',true);
- for(const [name,p] of Object.entries(Pts)){ctx.beginPath();ctx.fillStyle='#fff';ctx.strokeStyle='#0f2440';ctx.lineWidth=2;ctx.arc(p.x,p.y,5.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#0f2440';ctx.font='bold 14px system-ui';ctx.fillText(name,p.x+8,p.y-8)}
- ctx.save();ctx.strokeStyle='rgba(15,36,64,.35)';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);
- ctx.beginPath(); ctx.moveTo(Pts.A.x,0); ctx.lineTo(Pts.A.x,canvas.height); ctx.stroke();
- ctx.beginPath(); ctx.moveTo(Pts.D.x,0); ctx.lineTo(Pts.D.x,canvas.height); ctx.stroke();
- ctx.beginPath(); ctx.moveTo(Pts.F.x,0); ctx.lineTo(Pts.F.x,canvas.height); ctx.stroke();
- ctx.restore();
- const boxX=Math.max(8,Pts.G.x-88), boxY=Math.max(8,Pts.G.y-36);
- ctx.fillStyle='rgba(255,255,255,.82)'; ctx.fillRect(boxX, boxY, 122, 30); ctx.strokeStyle='#2e7d32'; ctx.strokeRect(boxX, boxY, 122, 30); ctx.fillStyle='#14324e'; ctx.font='bold 14px system-ui'; ctx.fillText(r.ft.toFixed(0)+' ft / '+r.m.toFixed(0)+' m', Math.max(12,Pts.G.x-84), Math.max(28,Pts.G.y-16));
+// SVG overlay uses the SAME 2048×1326 source coordinates as the digitized tracks.
+// Image and SVG share a single responsive container; no canvas pixel rescaling or z-index races.
+function drawResultOverlay(r){
+ const img=document.getElementById('graphImage'),svg=document.getElementById('overlay');
+ if(!img||!svg)return;
+ const p=r.trace.points;
+ const W=img.getBoundingClientRect().width, H=img.getBoundingClientRect().height;
+ if(!W||!H)return;
+ svg.style.width=W+'px';svg.style.height=H+'px';
+ svg.setAttribute('viewBox','0 0 2048 1326');
+ const segs=[['A','B','#1676d2',false],['B','C','#1676d2',true],['C','D','#e33626',false],['D','E','#e33626',true],['E','F','#8c1fa7',false],['F','G','#187f4a',true]];
+ const f=x=>Number(x).toFixed(2);
+ const paths=segs.map(([a,b,c,d])=>`<line x1="${f(p[a].x)}" y1="${f(p[a].y)}" x2="${f(p[b].x)}" y2="${f(p[b].y)}" stroke="${c}" stroke-width="8" stroke-linecap="round" ${d?'stroke-dasharray="18 13"':''}/>`).join('');
+ const pts=Object.entries(p).map(([n,v])=>`<circle cx="${f(v.x)}" cy="${f(v.y)}" r="11" fill="white" stroke="#102c40" stroke-width="4"/><text x="${f(v.x+16)}" y="${f(v.y-16)}" fill="#102c40" font-size="31" font-weight="bold" paint-order="stroke" stroke="white" stroke-width="5">${n}</text>`).join('');
+ const fx=Math.max(25,p.G.x-230),fy=Math.max(28,p.G.y-95);
+ const label=`<rect x="${f(fx)}" y="${f(fy)}" width="245" height="66" rx="11" fill="white" fill-opacity=".95" stroke="#187f4a" stroke-width="4"/><text x="${f(fx+12)}" y="${f(fy+43)}" fill="#102c40" font-weight="bold" font-size="34">${r.ft.toFixed(0)} ft / ${r.m.toFixed(0)} m</text>`;
+ svg.innerHTML=`<g>${paths}${pts}${label}</g>`;
+ document.getElementById('graphNote').textContent='Spezzata A–G visualizzata (versione SVG). Fonte: coordinate del calcolo; scopo diagnostico.';
 }
-function clearOverlay(){const canvas=document.getElementById('overlay');if(!canvas)return;const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height)}
+function clearOverlay(){const svg=document.getElementById('overlay');if(svg)svg.replaceChildren()}
 async function main(){const out=document.getElementById('status');try{tracks=await (await fetch('tracks.json')).json();out.textContent='Motore geometrico caricato'}catch(e){out.textContent='Impossibile caricare le curve: serve un server HTTP/HTTPS';out.className='status fail';return}
  const form=document.getElementById('calc'); const img=document.getElementById('graphImage');
  function recalc(ev){ if(ev) ev.preventDefault(); const params={alt:+document.getElementById('alt').value,temp:+document.getElementById('temp').value,mass:+document.getElementById('mass').value,wind:+document.getElementById('wind').value};try{const r=compute(params);document.getElementById('status').textContent='STIMA SPERIMENTALE — NON OPERATIVA';document.getElementById('status').className='status ok';document.getElementById('meters').textContent=r.m.toFixed(1)+' m';document.getElementById('feet').textContent=r.ft.toFixed(1)+' ft';document.getElementById('reason').textContent='La spezzata sul grafico permette un controllo visivo del percorso di lettura.';document.getElementById('trace').innerHTML=fillTraceTable(r);const qi=document.getElementById('quickInfo');qi.hidden=false;qi.innerHTML='<b>Percorso:</b> A→B verticale sulla temperatura, B→C trasferimento al blocco peso, C→D lettura del peso, D→E trasferimento al vento, E→F lettura del vento, F→G lettura finale della distanza.';drawResultOverlay(r)}catch(e){document.getElementById('status').textContent='CALCOLO BLOCCATO — DATI INSUFFICIENTI';document.getElementById('status').className='status fail';document.getElementById('meters').textContent='—';document.getElementById('feet').textContent='';document.getElementById('trace').textContent='';document.getElementById('reason').textContent=e.message;const qi=document.getElementById('quickInfo');qi.hidden=false;qi.textContent='Nessuna spezzata visualizzata perché il motore ha bloccato il calcolo.';clearOverlay()}}
