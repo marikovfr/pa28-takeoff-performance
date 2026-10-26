@@ -1,1 +1,7 @@
-PA-28-181 · Fig. 5-13 v0.12. Correzione della spezzata interattiva: SVG con viewBox nelle coordinate originali 2048 × 1326, sovrapposto al grafico colorato. Stesso motore numerico v0.11. NON VALIDATO PER USO OPERATIVO.
+# PWA v0.13 — correzione overlay SVG
+
+Correzione del conflitto di cache fra vecchia v0.10 (Canvas) e nuova v0.12 (SVG). Il motore usa l'elemento SVG e gli errori di visualizzazione non annullano il calcolo.
+
+Distribuzione: estrarre TUTTI i file nel livello principale del repository GitHub Pages.
+
+NON VALIDATO PER USO OPERATIVO.
