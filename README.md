@@ -1,7 +1,10 @@
-# PWA v0.13 — correzione overlay SVG
+# PA28 v0.14 — correzioni visualizzazione
 
-Correzione del conflitto di cache fra vecchia v0.10 (Canvas) e nuova v0.12 (SVG). Il motore usa l'elemento SVG e gli errori di visualizzazione non annullano il calcolo.
+- Etichetta della distanza collocata sotto il segmento di lettura finale.
+- Tratta del peso disegnata mediante interpolazione geometrica fra due curve rosse originali (pendenza verificata sul caso POH).
+- Prolungamento limitato delle curve di quota verso il basso per basse temperature, non oltre 65 px dal tracciato e non oltre il pannello.
+- Blocchi invariati: fuori dalle curve peso o vento nessuna estrapolazione indiscriminata; vento in coda non disponibile.
 
-Distribuzione: estrarre TUTTI i file nel livello principale del repository GitHub Pages.
+Test: 2000 ft, 21°C, 2400 lb, +10 kt -> 967.82 ft; pendenza del peso = media ponderata delle due curve rosse.
 
-NON VALIDATO PER USO OPERATIVO.
+**NON VALIDATO PER USO OPERATIVO**
