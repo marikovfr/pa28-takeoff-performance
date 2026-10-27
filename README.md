@@ -1,5 +1,9 @@
-PA-28-181 Figura 5-13 · v0.16
+# PWA v0.17
 
-Variazione diagnostica della pendenza del settore peso: +0,009 pixel di discesa verticale per pixel orizzontale rispetto alla v0.15. La variazione compare nello stesso modo nel tracciato SVG e nel risultato. Le estensioni di quota e la gestione dei casi fuori grafico rimangono invariate.
+Novità:
+- immagine ritagliata sul solo nomogramma per migliorarne la leggibilità su smartphone;
+- conversione massa kg → lb mostrata sotto il campo peso;
+- sblocco sperimentale del calcolo con vento in coda fino a 5 kt;
+- restano attive le estensioni quota a bassa temperatura e la lieve correzione di inclinazione del settore peso.
 
 NON VALIDATO PER USO OPERATIVO.
