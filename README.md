@@ -1,11 +1,5 @@
-# PWA v0.15
+PA-28-181 Figura 5-13 · v0.16
 
-Estensione sperimentale delle curve di pressure altitude verso sinistra per basse temperature e basse quote.
-
-Novità:
-- estensione sinistra molto più ampia delle curve quota/temperatura;
-- se l'estensione viene usata, viene mostrata in blu tratteggiato sul grafico;
-- estrapolazione controllata della famiglia peso e, se necessario, della famiglia vento per i casi freddi/bassa quota;
-- avviso esplicito quando il risultato scende sotto i 400 ft del limite inferiore del nomogramma originale.
+Variazione diagnostica della pendenza del settore peso: +0,009 pixel di discesa verticale per pixel orizzontale rispetto alla v0.15. La variazione compare nello stesso modo nel tracciato SVG e nel risultato. Le estensioni di quota e la gestione dei casi fuori grafico rimangono invariate.
 
 NON VALIDATO PER USO OPERATIVO.
