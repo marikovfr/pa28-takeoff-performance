@@ -1,1 +1,9 @@
-I-SABY W&B + Takeoff v0.19. Include inviluppi Normal e Utility inseriti dall’utente, C.G. dinamico, 50 US gal a 6 lb/gal, olio 6–8 qt con passo 0.25 e default 7 qt (7.5 lb/US gal). Riferimento al POH obbligatorio. ±2% è una sola tolleranza del confronto grafico del takeoff. NON VALIDATO PER USO OPERATIVO.
+# PA-28-181 · Ground Roll-Flap25° — v0.20 (I-SABY)
+
+- Titolo aggiornato.
+- Quota pressione: incrementi di 1 ft (non confondere con la quota densità).
+- Rimossa la selezione categoria W&B; il calcolo confronta automaticamente gli inviluppi Normal e Utility.
+- Promemoria sotto il nomogramma: erba corta +15%, erba alta +25%, pendenza (%) × 10; sono riferimenti indicativi NON approvati, NON applicati automaticamente.
+- Conservati W&B olio 7 qt, carburante max 50 US gal, tracciato nomogramma, vento in coda max 5 kt.
+
+Il modello NON È VALIDATO PER USO OPERATIVO. Consultare obbligatoriamente il POH applicabile a I-SABY. Il confronto ±2% riguarda solo il singolo esempio POH del nomogramma, non il W&B o le correzioni pista.
