@@ -1,9 +1,1 @@
-# PWA v0.17
-
-Novità:
-- immagine ritagliata sul solo nomogramma per migliorarne la leggibilità su smartphone;
-- conversione massa kg → lb mostrata sotto il campo peso;
-- sblocco sperimentale del calcolo con vento in coda fino a 5 kt;
-- restano attive le estensioni quota a bassa temperatura e la lieve correzione di inclinazione del settore peso.
-
-NON VALIDATO PER USO OPERATIVO.
+I-SABY W&B + Takeoff v0.19. Include inviluppi Normal e Utility inseriti dall’utente, C.G. dinamico, 50 US gal a 6 lb/gal, olio 6–8 qt con passo 0.25 e default 7 qt (7.5 lb/US gal). Riferimento al POH obbligatorio. ±2% è una sola tolleranza del confronto grafico del takeoff. NON VALIDATO PER USO OPERATIVO.
